@@ -12,6 +12,9 @@ body {
 .outer {
     width: 100%
 }
+.inner {
+    padding: 20px
+}
 #container {
     width: 900px;
 }
@@ -28,4 +31,6 @@ body {
   white-space: normal;
   margin-right: 5px;
 }
-
+.tag {
+    color: lightblue
+}

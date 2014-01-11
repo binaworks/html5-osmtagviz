@@ -44,12 +44,18 @@ function formatBBox() {
 //    });
 //}
 
+function handleTagClick(tagData) {
+    window.alert("Clicked on " + tagData.key);
+}
+        
 function makeTagList(osmJson) {
     var tagArray = [],
         tagCF,
         titleDimension,
         titleGroupCount,
-        tagKVArray;
+        tagKVArray,
+        taglistKeys,
+        tagLinks;
     //console.log(data.elements);
     osmJson.forEach(function (node) {
         var tagName;
@@ -66,9 +72,17 @@ function makeTagList(osmJson) {
     });
     titleGroupCount = titleDimension.group().reduceCount();
     tagKVArray = titleGroupCount.top(titleGroupCount.size());
-    d3.select("#taglist").selectAll(".tag").data(tagKVArray).enter().append("div").attr("class", "tag").text(function (d) {
-        return d.key + " (" + d.value + ")";
-    });
+    taglistKeys = d3.select("#taglist").selectAll(".tag").data(tagKVArray).enter().append("div").attr("class", "tag");
+    tagLinks = taglistKeys.append("a")
+					//.attr("class", "title")
+					//TODO not have javascript directly in the link
+					.attr("href", "#")
+					.text(function (d) { return d.key; });
+    tagLinks.on("click", function (d) { window.alert("Clicked on " + d.key); });
+
+//    d3.select("#taglist").selectAll(".tag").data(tagKVArray).enter().append("div").attr("class", "tag").text(function (d) {
+//        return d.key + " (" + d.value + ")";
+//    });
 //    listTags = d3.select("#taglist").data([enterTags]);
     //console.log(tags);    
 }
