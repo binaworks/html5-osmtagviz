@@ -5,9 +5,10 @@
 html, body, #map {
 	height: 100%;
 }*/
-body {
-    color: #f0f0f0;
-    background: rgb(33,33,33);
+body {    
+    font-family: Arial, Helvetica, sans-serif;
+    background: rgb(242,242,242);
+    color: rgb(55,55,55);
 }
 .outer {
     width: 100%
@@ -15,14 +16,18 @@ body {
 .inner {
     padding: 20px
 }
+#header {
+    color: #f0f0f0;
+    background: rgb(33,33,33);
+}
 #container {
     width: 900px;
+    height: 100%
 }
 #map {
     width:475px;
     height: 450px;
     float: left;
-    color: rgb(55,55,55);
 }
 #taglist {
   float: left;
