@@ -112,7 +112,7 @@ function onMapViewReset() {
 
 function makeMap() {
     // Set default location (in London)
-    OsmTagVis.map = L.map('map').setView([51.505, -0.09], 13);
+    OsmTagVis.map = L.map('map').setView(OsmTagVis.currentPosition, 13);
     var map = OsmTagVis.map;
     map.on('viewreset', queryOverpass);
 
@@ -127,14 +127,50 @@ function makeMap() {
     map.on('locationfound', onLocationFound);
     map.on('locationerror', onLocationError);
 
-    map.locate({
-        setView : true,
-        maxZoom : 16
-    });
+//    map.locate({
+//        setView : true,
+//        maxZoom : 16
+//    });
+    queryOverpass();
+}
+
+function showLocationError(error) {
+    var errMsg;
+    switch (error.code) {
+    case error.PERMISSION_DENIED:
+        errMsg = "User denied the request for Geolocation.";
+        break;
+    case error.POSITION_UNAVAILABLE:
+        errMsg = "Location information is unavailable.";
+        break;
+    case error.TIMEOUT:
+        errMsg = "The request to get user location timed out.";
+        break;
+    case error.UNKNOWN_ERROR:
+        errMsg = "An unknown error occurred.";
+        break;
+    }
+    window.alert(errMsg);
+}
+
+function setPosition(position) {
+    OsmTagVis.currentPosition = [position.coords.latitude, position.coords.longitude];
+    makeMap();
+}
+
+function getLocation() {
+    // default to Santa Barbara
+    OsmTagVis.currentPosition = [34.4258, -119.7142];
+    if (window.navigator.geolocation) {
+        window.navigator.geolocation.getCurrentPosition(setPosition, showLocationError);
+    } else {
+        window.alert("Geolocation is not supported by this browser.");
+    }
 }
 
 function startUp() {
-    makeMap();
-    queryOverpass();
+    getLocation();
+//    makeMap();
+//    queryOverpass();
 }
 
