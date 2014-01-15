@@ -47,6 +47,15 @@ function formatBBox() {
 function handleTagClick(tagData) {
     window.alert("Clicked on " + tagData.key);
 }
+
+function makeMarkers(osmJson) {
+    var markerCG = L.markerClusterGroup();
+    osmJson.forEach(function (node) {
+        var marker = L.marker(new L.LatLng(node.lat, node.lon), {title: node.tags.name});
+        markerCG.addLayer(marker);
+    });
+    OsmTagVis.map.addLayer(markerCG);
+}
         
 function makeTagList(osmJson) {
     var tagArray = [],
@@ -101,6 +110,7 @@ function queryOverpass() {
             //console.log(data);
             var osmJson = data.elements;
             makeTagList(osmJson);
+            makeMarkers(osmJson);
         }
         //beforeSend: setHeader
     });
@@ -114,7 +124,7 @@ function makeMap() {
     // Set default location (in London)
     OsmTagVis.map = L.map('map').setView(OsmTagVis.currentPosition, 13);
     var map = OsmTagVis.map;
-    map.on('viewreset', queryOverpass);
+    //map.on('viewreset', queryOverpass);
 
     // add an OpenStreetMap tile layer
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
