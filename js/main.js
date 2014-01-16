@@ -45,7 +45,7 @@ function formatBBox() {
 //}
 
 function handleTagClick(tagData) {
-    window.alert("Clicked on " + tagData.key);
+    OsmTagVis.currentTag = tagData.key;
 }
 
 function makeMarkers(osmJson) {
@@ -86,7 +86,7 @@ function makeTagList(osmJson) {
 					//.attr("class", "title")
 					//TODO not have javascript directly in the link
 					.attr("href", "#")
-					.text(function (d) { return d.key; });
+					.text(function (d) { return d.key + " (" + d.value + ")"; });
     tagLinks.on("click", function (d) { window.alert("Clicked on " + d.key); });
 
 //    d3.select("#taglist").selectAll(".tag").data(tagKVArray).enter().append("div").attr("class", "tag").text(function (d) {
@@ -121,9 +121,8 @@ function onMapViewReset() {
 }
 
 function makeMap() {
-    // Set default location (in London)
-    OsmTagVis.map = L.map('map').setView(OsmTagVis.currentPosition, 13);
     var map = OsmTagVis.map;
+    map.setView(OsmTagVis.currentPosition, 13);
     //map.on('viewreset', queryOverpass);
 
     // add an OpenStreetMap tile layer
@@ -169,8 +168,6 @@ function setPosition(position) {
 }
 
 function getLocation() {
-    // default to Santa Barbara
-    OsmTagVis.currentPosition = [34.4258, -119.7142];
     if (window.navigator.geolocation) {
         window.navigator.geolocation.getCurrentPosition(setPosition, showLocationError);
     } else {
@@ -178,7 +175,17 @@ function getLocation() {
     }
 }
 
+function initOsmTagVis() {
+    // default to Santa Barbara
+    OsmTagVis.currentPosition = [34.4258, -119.7142];
+    OsmTagVis.map = L.map('map');
+    OsmTagVis.currentTag = "name";
+    OsmTagVis.markerClusterGroup = L.markerClusterGroup();
+
+}
+
 function startUp() {
+    initOsmTagVis();
     getLocation();
 //    makeMap();
 //    queryOverpass();
