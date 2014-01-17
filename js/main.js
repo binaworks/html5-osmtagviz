@@ -50,8 +50,9 @@ function runOsmTagVis() {
             titleDimension,
             titleGroupCount,
             tagKVArray,
+            formRB,
             taglistKeys,
-            tagLinks,
+            tagRadioButtons,
             osmJson = OsmTagVis.osmJson;
         //console.log(data.elements);
         osmJson.forEach(function (node) {
@@ -69,13 +70,16 @@ function runOsmTagVis() {
         });
         titleGroupCount = titleDimension.group().reduceCount();
         tagKVArray = titleGroupCount.top(titleGroupCount.size());
-        taglistKeys = d3.select("#taglist").selectAll(".tag").data(tagKVArray).enter().append("div").attr("class", "tag");
-        tagLinks = taglistKeys.append("a")
-                        //.attr("class", "title")
-                        //TODO not have javascript directly in the link
-                        .attr("href", "#")
-                        .text(function (d) { return d.key + " (" + d.value + ")"; });
-        tagLinks.on("click", handleTagClick);
+        taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
+        tagRadioButtons = taglistKeys.insert("input")
+                            .attr({ type: "radio",
+                                    name: "tagRadioButton",
+                                    value: function (d, i) { return i; }
+                                  })
+                            .attr("class", "radiobtn")
+                            .property("checked", function (d, i) { return (d.key === "name"); });
+        taglistKeys.insert("label").text(function (d) { return " " + d.key + " (" + d.value + ")"; });
+        tagRadioButtons.on("click", handleTagClick);
     }
     
     function queryOverpass() {

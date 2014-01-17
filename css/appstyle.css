@@ -31,11 +31,9 @@ body {
 }
 #taglist {
   float: left;
-  width:185px;
+  width:200px;
   font-size: 13px;
   white-space: normal;
   margin-right: 5px;
 }
-.tag {
-    color: lightblue
-}
+
