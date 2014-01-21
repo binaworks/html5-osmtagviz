@@ -3,7 +3,7 @@ function runOsmTagVis() {
     'use strict';
     
     // library globals
-    /*global L, $, crossfilter, d3, console, window*/
+    /*global L, $, crossfilter, d3, Spinner, console, window*/
     /*jslint plusplus: true*/
     
     var OsmTagVis = {};
@@ -54,10 +54,8 @@ function runOsmTagVis() {
             taglistKeys,
             tagRadioButtons,
             osmJson = OsmTagVis.osmJson;
-        //console.log(data.elements);
         osmJson.forEach(function (node) {
             var tagName;
-            console.log(node);
             for (tagName in node.tags) {
                 if (node.tags.hasOwnProperty(tagName)) {
                     tagArray.push({title: tagName, total: 1});
@@ -70,14 +68,14 @@ function runOsmTagVis() {
         });
         titleGroupCount = titleDimension.group().reduceCount();
         tagKVArray = titleGroupCount.top(titleGroupCount.size());
+        d3.select("#tagform").selectAll("div").remove();
         taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
         tagRadioButtons = taglistKeys.insert("input")
                             .attr({ type: "radio",
                                     name: "tagRadioButton",
                                     value: function (d, i) { return i; }
                                   })
-                            .attr("class", "radiobtn")
-                            .property("checked", function (d, i) { return (d.key === "name"); });
+                            .property("checked", function (d, i) { return (d.key === OsmTagVis.currentTag); });
         taglistKeys.insert("label").text(function (d) { return " " + d.key + " (" + d.value + ")"; });
         tagRadioButtons.on("click", handleTagClick);
     }
@@ -97,8 +95,10 @@ function runOsmTagVis() {
                 OsmTagVis.osmJson = data.elements;
                 makeTagList();
                 makeMarkers();
+            },
+            error : function (request, status, errorThrown) {
+                window.alert("Overpass Query failed with error: \n" + errorThrown);
             }
-            //beforeSend: setHeader
         });
     }
     
@@ -109,7 +109,7 @@ function runOsmTagVis() {
     function makeMap() {
         var map = OsmTagVis.map;
         map.setView(OsmTagVis.currentPosition, 13);
-        //map.on('viewreset', queryOverpass);
+        map.on('viewreset', queryOverpass);
     
         // add an OpenStreetMap tile layer
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -128,6 +128,7 @@ function runOsmTagVis() {
     //        maxZoom : 16
     //    });
         queryOverpass();
+        OsmTagVis.spinner.stop();
     }
     
     function showLocationError(error) {
@@ -154,6 +155,31 @@ function runOsmTagVis() {
         makeMap();
     }
     
+    function startSpinner() {
+        var opts = {
+                lines: 6, // The number of lines to draw
+                length: 3, // The length of each line
+                width: 3, // The line thickness
+                radius: 10, // The radius of the inner circle
+                corners: 1, // Corner roundness (0..1)
+                rotate: 0, // The rotation offset
+                direction: 1, // 1: clockwise, -1: counterclockwise
+                color: '#000', // #rgb or #rrggbb or array of colors
+                speed: 1, // Rounds per second
+                trail: 60, // Afterglow percentage
+                shadow: false, // Whether to render a shadow
+                hwaccel: false, // Whether to use hardware acceleration
+                className: 'spinner', // The CSS class to assign to the spinner
+                zIndex: 2e9, // The z-index (defaults to 2000000000)
+                top: 'auto', // Top position relative to parent in px
+                left: 'auto' // Left position relative to parent in px
+            },
+//            target = d3.select("#container");
+            target = document.getElementById('map');
+        OsmTagVis.spinner = new Spinner(opts).spin(target);
+        
+    }
+    
     function getLocation() {
         if (window.navigator.geolocation) {
             window.navigator.geolocation.getCurrentPosition(setPosition, showLocationError);
@@ -168,6 +194,7 @@ function runOsmTagVis() {
     OsmTagVis.currentTag = "name";
     OsmTagVis.markerClusterGroup = L.markerClusterGroup();
     OsmTagVis.osmJson = {};
+    startSpinner();
     // Try to get current location
     getLocation();
 //    makeMap();

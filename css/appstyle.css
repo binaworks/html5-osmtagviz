@@ -25,8 +25,8 @@ body {
     height: 100%
 }
 #map {
-    width:475px;
-    height: 450px;
+    width: 650px;
+    height: 650px;
     float: left;
 }
 #taglist {
