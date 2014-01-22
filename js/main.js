@@ -26,6 +26,17 @@ function runOsmTagVis() {
         return bbString;
     }
     
+    function formatMarkerInfo(node) {
+        var formattedString = "",
+            tagName;
+        for (tagName in node.tags) {
+            if (node.tags.hasOwnProperty(tagName)) {
+                formattedString = formattedString + "<b>" + tagName + "</b>:\t" + node.tags[tagName] + "<br>";
+            }
+        }
+        return formattedString;
+    }
+    
     function makeMarkers() {
         var markerCG = OsmTagVis.markerClusterGroup;
         markerCG.clearLayers();
@@ -33,6 +44,7 @@ function runOsmTagVis() {
             var marker;
             if (node.tags.hasOwnProperty(OsmTagVis.currentTag)) {
                 marker = L.marker(new L.LatLng(node.lat, node.lon), {title: node.tags.name});
+                marker.bindPopup( formatMarkerInfo(node));
                 markerCG.addLayer(marker);
             }
         });
@@ -108,7 +120,7 @@ function runOsmTagVis() {
     
     function makeMap() {
         var map = OsmTagVis.map;
-        map.setView(OsmTagVis.currentPosition, 13);
+        map.setView(OsmTagVis.currentPosition, 16);
         map.on('viewreset', queryOverpass);
     
         // add an OpenStreetMap tile layer
