@@ -44,7 +44,7 @@ function runOsmTagVis() {
             var marker;
             if (node.tags.hasOwnProperty(OsmTagVis.currentTag)) {
                 marker = L.marker(new L.LatLng(node.lat, node.lon), {title: node.tags.name});
-                marker.bindPopup( formatMarkerInfo(node));
+                marker.bindPopup(formatMarkerInfo(node));
                 markerCG.addLayer(marker);
             }
         });
@@ -187,7 +187,7 @@ function runOsmTagVis() {
                 left: 'auto' // Left position relative to parent in px
             },
 //            target = d3.select("#container");
-            target = document.getElementById('map');
+            target = window.document.getElementById('map');
         OsmTagVis.spinner = new Spinner(opts).spin(target);
         
     }
