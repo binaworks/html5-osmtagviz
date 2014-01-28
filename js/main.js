@@ -1,3 +1,7 @@
+/**
+  * OpenStreetMap Tag Explorer encapsulating function.
+  * Contains all app variables and functions.
+  */
 function runOsmTagVis() {
 
     'use strict';
@@ -8,6 +12,10 @@ function runOsmTagVis() {
     
     var OsmTagVis = {};
     
+    /**
+      * Respond to Leaflet locationfound event.
+      * @param {LocationEvent} e Holds information about the location found.
+      */
     function onLocationFound(e) {
         var radius = e.accuracy / 2,
             map = OsmTagVis.map;
@@ -15,10 +23,18 @@ function runOsmTagVis() {
         L.circle(e.latlng, radius).addTo(map);
     }
     
+    /**
+      * Display Leaflet locate error.
+      * @param {ErrorEvent} e Contains the error message.
+      */
     function onLocationError(e) {
         window.alert(e.message);
     }
     
+    /**
+      * Get the current map bounding box.
+      * @return {string} The bounding box formatted for use in Overpass API query.
+      */
     function formatBBox() {
         var map = OsmTagVis.map,
             mapLatLngBounds = map.getBounds(),
@@ -26,6 +42,11 @@ function runOsmTagVis() {
         return bbString;
     }
     
+    /**
+      * Format OpenStreetMap node's tag information for use in map pop-up.
+      * @param {object} node
+      * @return {string} Formatted tag information.
+      */
     function formatMarkerInfo(node) {
         var formattedString = "",
             tagName;
@@ -37,6 +58,10 @@ function runOsmTagVis() {
         return formattedString;
     }
     
+    /**
+      * Create markers for every OpenStreetMap node in last query result.
+      * Use Leaflet MarkerCluster plugin for clustering.
+      */
     function makeMarkers() {
         var markerCG = OsmTagVis.markerClusterGroup;
         markerCG.clearLayers();
@@ -50,12 +75,18 @@ function runOsmTagVis() {
         });
     }
     
+    /**
+      * When a tag is clicked, update map to display markers for nodes having the selected tag.
+      * @param {object} tagData Data associated with selected tag.
+      */
     function handleTagClick(tagData) {
         OsmTagVis.currentTag = tagData.key;
         makeMarkers();
     }
     
-            
+    /**
+      * Generate list of selectable tag names with counts.
+      */
     function makeTagList() {
         var tagArray = [],
             tagCF,
@@ -66,6 +97,9 @@ function runOsmTagVis() {
             taglistKeys,
             tagRadioButtons,
             osmJson = OsmTagVis.osmJson;
+        //
+        // Create array of tags from last query result.
+        //
         osmJson.forEach(function (node) {
             var tagName;
             for (tagName in node.tags) {
@@ -74,12 +108,18 @@ function runOsmTagVis() {
                 }
             }
         });
+        //
+        // Use Crossfilter to count occurrences of each tag.
+        //
         tagCF = crossfilter(tagArray);
         titleDimension = tagCF.dimension(function (d) {
             return d.title;
         });
         titleGroupCount = titleDimension.group().reduceCount();
         tagKVArray = titleGroupCount.top(titleGroupCount.size());
+        //
+        // Use D3 to generate a radio button for each tag and bind the tag data.
+        //
         d3.select("#tagform").selectAll("div").remove();
         taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
         tagRadioButtons = taglistKeys.insert("input")
@@ -92,6 +132,10 @@ function runOsmTagVis() {
         tagRadioButtons.on("click", handleTagClick);
     }
     
+    /**
+      * Execute Overpass API query for named nodes within map's current bounding box.
+      * If successful, update list of selectable tags and map markers.
+      */
     function queryOverpass() {
         var bbString = formatBBox(),
             overpassQuery = encodeURIComponent("node" + '["name"]' + bbString + ";out body;"),
@@ -114,15 +158,33 @@ function runOsmTagVis() {
         });
     }
     
-    function onMapViewReset() {
+    /**
+      * Respond to Leaflet viewreset event - execute query for current bounding box.
+      * @param {Event} e Leaflet event object.
+      */
+    function onMapViewReset(e) {
+        console.log("Map View Reset.");
         queryOverpass();
     }
     
+    /**
+      * Respond to Leaflet moveend event - execute query for current bounding box.
+      * @param {Event} e Leaflet event object.
+      */
+    function onMapMoveEnd(e) {
+        console.log("Map Moved.");
+        queryOverpass();
+    }
+    
+    /**
+      * Create initial view of map with base map layer.
+      */
     function makeMap() {
         var map = OsmTagVis.map;
         map.setView(OsmTagVis.currentPosition, 16);
-        map.on('viewreset', queryOverpass);
-    
+        map.on('viewreset', onMapViewReset);
+        map.on('moveend', onMapMoveEnd);
+
         // add an OpenStreetMap tile layer
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution : '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -140,35 +202,12 @@ function runOsmTagVis() {
     //        maxZoom : 16
     //    });
         queryOverpass();
-        OsmTagVis.spinner.stop();
     }
     
-    function showLocationError(error) {
-        var errMsg;
-        switch (error.code) {
-        case error.PERMISSION_DENIED:
-            errMsg = "User denied the request for Geolocation.";
-            break;
-        case error.POSITION_UNAVAILABLE:
-            errMsg = "Location information is unavailable.";
-            break;
-        case error.TIMEOUT:
-            errMsg = "The request to get user location timed out.";
-            break;
-        case error.UNKNOWN_ERROR:
-            errMsg = "An unknown error occurred.";
-            break;
-        }
-        window.alert(errMsg);
-        // Use default position
-        makeMap();
-    }
-    
-    function setPosition(position) {
-        OsmTagVis.currentPosition = [position.coords.latitude, position.coords.longitude];
-        makeMap();
-    }
-    
+    /**
+      * Use Spinner plugin for slow operations.
+      * Not currently used.
+      */
     function startSpinner() {
         var opts = {
                 lines: 6, // The number of lines to draw
@@ -188,34 +227,20 @@ function runOsmTagVis() {
                 top: 'auto', // Top position relative to parent in px
                 left: 'auto' // Left position relative to parent in px
             },
-//            target = d3.select("#container");
             target = window.document.getElementById('map');
         OsmTagVis.spinner = new Spinner(opts).spin(target);
         
     }
     
-    function getLocation() {
-        if (window.navigator.geolocation) {
-            window.navigator.geolocation.getCurrentPosition(setPosition, showLocationError);
-        } else {
-            window.alert("Geolocation is not supported by this browser.");
-            // Use default position
-            makeMap();
-        }
-    }
-    //Initialize app variables.
-    // default to Santa Barbara
+    //
+    // Initialize app variables.
+    //
+    // Default location is in Santa Barbara.
     OsmTagVis.currentPosition = [34.4258, -119.7142];
     OsmTagVis.map = L.map('map');
     OsmTagVis.currentTag = "name";
     OsmTagVis.markerClusterGroup = L.markerClusterGroup();
     OsmTagVis.osmJson = {};
-    startSpinner();
-    // Try to get current location
-//    getLocation();
     makeMap();
-//    queryOverpass();
-
-    
 }
 
