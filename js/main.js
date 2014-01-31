@@ -85,17 +85,15 @@ function runOsmTagVis() {
     }
     
     /**
-      * Generate list of selectable tag names with counts.
+      * Group and count tag names in last query result.
+      * @return {Array} Array of key, value pairs containing tag name and count.
       */
-    function makeTagList() {
+    function groupTagsByName() {
         var tagArray = [],
             tagCF,
             titleDimension,
             titleGroupCount,
             tagKVArray,
-            formRB,
-            taglistKeys,
-            tagRadioButtons,
             osmJson = OsmTagVis.osmJson;
         //
         // Create array of tags from last query result.
@@ -116,7 +114,21 @@ function runOsmTagVis() {
             return d.title;
         });
         titleGroupCount = titleDimension.group().reduceCount();
-        tagKVArray = titleGroupCount.top(titleGroupCount.size());
+        tagKVArray = titleGroupCount.all(titleGroupCount.size());
+        return tagKVArray;
+    }
+    
+    /**
+      * Generate list of selectable tag names with counts.
+      */
+    function makeTagList() {
+        var tagKVArray,
+            formRB,
+            taglistKeys,
+            tagRadioButtons,
+            osmJson = OsmTagVis.osmJson;
+        
+        tagKVArray = groupTagsByName();
         //
         // Use D3 to generate a radio button for each tag and bind the tag data.
         //
