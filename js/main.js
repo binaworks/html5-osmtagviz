@@ -151,6 +151,7 @@ function runOsmTagVis() {
             tagKVArray;
         OsmTagVis.chartBars = svgElt.selectAll("rect").remove();
         OsmTagVis.chartLabels = svgElt.selectAll("text").remove();
+        svgElt.attr("height", tagGrouping.size() * yInc + 1);
         if (tagGrouping.size() > 0) {
             tagKVArray = tagGrouping.all(tagGrouping.size());
             maxCount = tagGrouping.top(1)[0].value;
