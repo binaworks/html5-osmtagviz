@@ -147,26 +147,20 @@ function runOsmTagVis() {
             textEndPosition = sectionWidth - 1,
             rectX = sectionWidth + 1,
             maxCount,
-            xInc = 1,
-            tagKVArray;
+            tagKVArray,
+            xScale,
+            xAxis,
+            chartHeight;
         OsmTagVis.chartBars = svgElt.selectAll("rect").remove();
         OsmTagVis.chartLabels = svgElt.selectAll("text").remove();
-        svgElt.attr("height", tagGrouping.size() * yInc + 1);
+        svgElt.selectAll("g").remove();
+        chartHeight = tagGrouping.size() * yInc;
+        svgElt.attr("height", chartHeight + 30);
         if (tagGrouping.size() > 0) {
             tagKVArray = tagGrouping.all(tagGrouping.size());
             maxCount = tagGrouping.top(1)[0].value;
-            xInc = (sectionWidth - 2) / maxCount;
-            OsmTagVis.chartBars = svgElt.selectAll("rect")
-                    .data(tagKVArray)
-                    .enter()
-                    .append("rect")
-                    .attr({ x : rectX,
-                            y : function (d, i) { return i * yInc; },
-                            width : function (d) { return d.value * xInc; },
-                            height : barHeight
-                          })
-                    .style("fill", getBarColor)
-                    .on("click", handleTagClick);
+            xScale = d3.scale.linear().domain([0, maxCount]).range([0, sectionWidth]);
+            xAxis = d3.svg.axis().scale(xScale).orient("bottom").ticks(2);
             OsmTagVis.chartLabels = svgElt.selectAll("text")
                     .data(tagKVArray)
                     .enter()
@@ -177,6 +171,22 @@ function runOsmTagVis() {
                           })
                     .style("font-weight", getLabelWeight)
                     .on("click", handleTagClick);
+            svgElt.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(" + rectX + "," + chartHeight + ")")
+                .call(xAxis);
+            OsmTagVis.chartBars = svgElt.selectAll("rect")
+                    .data(tagKVArray)
+                    .enter()
+                    .append("rect")
+                    .attr({ x : rectX,
+                            y : function (d, i) { return i * yInc; },
+                            width : function (d) { return xScale(d.value); },
+                            height : barHeight
+                          })
+                    .style("fill", getBarColor)
+                    .on("click", handleTagClick);
+            
         }
     }
                   
