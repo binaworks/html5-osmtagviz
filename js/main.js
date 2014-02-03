@@ -183,28 +183,9 @@ function runOsmTagVis() {
       * Generate list of selectable tag names with counts.
       */
     function makeTagList() {
-        var tagKVArray,
-            formRB,
-            taglistKeys,
-            tagRadioButtons,
-            osmJson = OsmTagVis.osmJson,
-            tagGrouping;
-        
+        var tagGrouping;
         tagGrouping = groupTagsByName();
-        //
-        // Use D3 to generate a radio button for each tag and bind the tag data.
-        //
         makeBarChart(tagGrouping);
-//        d3.select("#tagform").selectAll("div").remove();
-//        taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
-//        tagRadioButtons = taglistKeys.insert("input")
-//                            .attr({ type: "radio",
-//                                    name: "tagRadioButton",
-//                                    value: function (d, i) { return i; }
-//                                  })
-//                            .property("checked", function (d, i) { return (d.key === OsmTagVis.currentTag); });
-//        taglistKeys.insert("label").text(function (d) { return " " + d.key + " (" + d.value + ")"; });
-//        tagRadioButtons.on("click", handleTagClick);
     }
     
     /**

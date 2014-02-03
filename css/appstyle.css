@@ -14,7 +14,7 @@ body {
     width: 100%
 }
 .inner {
-    padding: 20px
+    padding: 10px
 }
 #header {
     color: #f0f0f0;
@@ -31,16 +31,16 @@ body {
 }
 #taglist {
   float: left;
-  width:200px;
-  font-size: 13px;
-  white-space: normal;
-  margin-right: 5px;
-}
-#tagchart {
-    height:650;
+  width: 200px;
 }
 text {
     font-family: sans-serif;
     font-size: 11px;
     text-anchor: end;
+}
+text:hover {
+    text-decoration: underline;
+}
+rect:hover {
+    opacity: 0.5;
 }
