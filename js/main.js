@@ -76,17 +76,35 @@ function runOsmTagVis() {
     }
     
     /**
+      * Get color for current bar. Determined by last selection.
+      * @return {string} The color.
+      */
+    function getBarColor(d) {
+        return d.key === OsmTagVis.currentTag ? "orange" : "lightsteelblue";
+    }
+    
+    /**
+      * Get font-weight for current text. Determined by last selection.
+      * @return {string} The font-weight.
+      */
+    function getLabelWeight(d) {
+        return d.key === OsmTagVis.currentTag ? "bold" : "normal";
+    }
+    
+    /**
       * When a tag is clicked, update map to display markers for nodes having the selected tag.
       * @param {object} tagData Data associated with selected tag.
       */
     function handleTagClick(tagData) {
         OsmTagVis.currentTag = tagData.key;
+        OsmTagVis.chartBars.style("fill", getBarColor);
+        OsmTagVis.chartLabels.style("font-weight", getLabelWeight);
         makeMarkers();
     }
     
     /**
       * Group and count tag names in last query result.
-      * @return {Array} Array of key, value pairs containing tag name and count.
+      * @return {object} Crossfilter grouping.
       */
     function groupTagsByName() {
         var tagArray = [],
@@ -114,10 +132,53 @@ function runOsmTagVis() {
             return d.title;
         });
         titleGroupCount = titleDimension.group().reduceCount();
-        tagKVArray = titleGroupCount.all(titleGroupCount.size());
-        return tagKVArray;
+        return titleGroupCount;
     }
     
+    /**
+      * Create bar chart for tag names in last query result.
+      * @param {object} tagGrouping Crossfilter grouping (key : tag name, value : count).
+      */
+    function makeBarChart(tagGrouping) {
+        var svgElt = d3.select("#tagchart"),
+            yInc = 25,
+            barHeight = yInc - 1,
+            sectionWidth = 100,
+            textEndPosition = sectionWidth - 1,
+            rectX = sectionWidth + 1,
+            maxCount,
+            xInc = 1,
+            tagKVArray;
+        OsmTagVis.chartBars = svgElt.selectAll("rect").remove();
+        OsmTagVis.chartLabels = svgElt.selectAll("text").remove();
+        if (tagGrouping.size() > 0) {
+            tagKVArray = tagGrouping.all(tagGrouping.size());
+            maxCount = tagGrouping.top(1)[0].value;
+            xInc = (sectionWidth - 2) / maxCount;
+            OsmTagVis.chartBars = svgElt.selectAll("rect")
+                    .data(tagKVArray)
+                    .enter()
+                    .append("rect")
+                    .attr({ x : rectX,
+                            y : function (d, i) { return i * yInc; },
+                            width : function (d) { return d.value * xInc; },
+                            height : barHeight
+                          })
+                    .style("fill", getBarColor)
+                    .on("click", handleTagClick);
+            OsmTagVis.chartLabels = svgElt.selectAll("text")
+                    .data(tagKVArray)
+                    .enter()
+                    .append("text")
+                    .text(function (d) { return d.key; })
+                    .attr({ x : textEndPosition,
+                            y : function (d, i) { return i * yInc + yInc / 2; }
+                          })
+                    .style("font-weight", getLabelWeight)
+                    .on("click", handleTagClick);
+        }
+    }
+                  
     /**
       * Generate list of selectable tag names with counts.
       */
@@ -126,22 +187,24 @@ function runOsmTagVis() {
             formRB,
             taglistKeys,
             tagRadioButtons,
-            osmJson = OsmTagVis.osmJson;
+            osmJson = OsmTagVis.osmJson,
+            tagGrouping;
         
-        tagKVArray = groupTagsByName();
+        tagGrouping = groupTagsByName();
         //
         // Use D3 to generate a radio button for each tag and bind the tag data.
         //
-        d3.select("#tagform").selectAll("div").remove();
-        taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
-        tagRadioButtons = taglistKeys.insert("input")
-                            .attr({ type: "radio",
-                                    name: "tagRadioButton",
-                                    value: function (d, i) { return i; }
-                                  })
-                            .property("checked", function (d, i) { return (d.key === OsmTagVis.currentTag); });
-        taglistKeys.insert("label").text(function (d) { return " " + d.key + " (" + d.value + ")"; });
-        tagRadioButtons.on("click", handleTagClick);
+        makeBarChart(tagGrouping);
+//        d3.select("#tagform").selectAll("div").remove();
+//        taglistKeys = d3.select("#tagform").selectAll("div").data(tagKVArray).enter().append("div");
+//        tagRadioButtons = taglistKeys.insert("input")
+//                            .attr({ type: "radio",
+//                                    name: "tagRadioButton",
+//                                    value: function (d, i) { return i; }
+//                                  })
+//                            .property("checked", function (d, i) { return (d.key === OsmTagVis.currentTag); });
+//        taglistKeys.insert("label").text(function (d) { return " " + d.key + " (" + d.value + ")"; });
+//        tagRadioButtons.on("click", handleTagClick);
     }
     
     /**

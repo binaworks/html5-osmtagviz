@@ -36,4 +36,11 @@ body {
   white-space: normal;
   margin-right: 5px;
 }
-
+#tagchart {
+    height:650;
+}
+text {
+    font-family: sans-serif;
+    font-size: 11px;
+    text-anchor: end;
+}
