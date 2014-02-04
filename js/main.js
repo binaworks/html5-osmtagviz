@@ -304,7 +304,8 @@ function runOsmTagVis() {
     //
     // Default location is in Santa Barbara.
     OsmTagVis.currentPosition = [34.4258, -119.7142];
-    OsmTagVis.map = L.map('map');
+    // Set minimum zoom level to avoid hitting Overpass API bounding box limit.
+    OsmTagVis.map = L.map('map', { minZoom: 11});
     OsmTagVis.currentTag = "name";
     OsmTagVis.markerClusterGroup = L.markerClusterGroup();
     OsmTagVis.osmJson = {};
