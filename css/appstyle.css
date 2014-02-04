@@ -14,9 +14,9 @@ body {
     width: 100%
 }
 .inner {
-    padding: 10px
+    padding: 10px;
 }
-#header {
+header {
     color: #f0f0f0;
     background: rgb(33,33,33);
 }
@@ -55,4 +55,18 @@ rect:hover {
 }
 .x.axis path {
   display: none;
+}
+#gh_repository {
+  display: block;
+  position: fixed;
+  top:30px;
+  left: 800px;
+}
+
+#gh_img {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
 }
