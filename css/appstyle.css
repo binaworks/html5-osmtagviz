@@ -15,23 +15,25 @@ body {
 }
 .inner {
     padding: 10px;
+    margin: 0 auto;
+    max-width: 960px;
+    position: relative;
 }
-header {
+#header_wrap {
     color: #f0f0f0;
     background: rgb(33,33,33);
 }
 #container {
-    width: 900px;
     height: 100%
 }
 #map {
-    width: 650px;
-    height: 650px;
+    width: 700px;
+    height: 700px;
     float: left;
 }
 #taglist {
   float: left;
-  width: 210px;
+  width: 250px;
 }
 text {
     font-family: sans-serif;
@@ -58,9 +60,10 @@ rect:hover {
 }
 #gh_repository {
   display: block;
-  position: fixed;
+  position: absolute;
   top:30px;
-  left: 800px;
+  right:30px;
+  vertical-align: baseline;
 }
 
 #gh_img {
